@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Accordion</title>
+
+<style>
+.accordion {
+   margin: 50px;   
+   dt, dd {
+      padding: 10px;
+      border: 1px solid black;
+      border-bottom: 0; 
+      &:last-of-type {
+        border-bottom: 1px solid black; 
+      }
+      a {
+        display: block;
+        color: black;
+        font-weight: bold;
+      }
+   }
+  dd {
+     border-top: 0; 
+     font-size: 12px;
+     &:last-of-type {
+       border-top: 1px solid white;
+       position: relative;
+       top: -1px;
+     }
+  }
+}
+</style>
+<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function($) {
+  var allPanels = $('.accordion > dd').hide();
+  $('.accordion > dt > a').click(function() {
+    allPanels.slideUp();
+    $(this).parent().next().slideDown();
+    return false;
+  });
+  
+  $("[accordion] [dd]:not(:first)").hide();
+ //or hide all of them
+ //$("[unique id or class of accordion] [element]").hide();
+ $("[accordion] [dd]").click(function(){
+ $(this).next("[dd]").slideToggle()
+ .siblings("[dd]:visible").slideUp();
+ });
+ 
+});
+</script>
+</head>
+
+<body>
+<dl class="accordion">
+<script type="text/javascript">
+$(document).ready(function($) {
+ hash = window.location.hash;
+ if(hash != 0)
+ {
+ $(hash).trigger('click');
+ }
+
+});
+</script>
+
+<dt><a href="" id="ac1">Panel 1</a></dt>
+<dd id="ac1">Pellentesque fermentum dolor. Aliquam quam lectus, facilisis auctor, ultrices ut, elementum vulputate, nunc.</dd>
+
+<dt><a href="" id="ac2">Panel 2</a></dt>
+<dd id="ac2">Donec nec justo eget felis facilisis fermentum. Aliquam porttitor mauris sit amet orci. Aenean dignissim pellentesque felis.</dd>
+
+<dt><a href="" id="ac3">Panel 3</a></dt>
+<dd id="ac3">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Phasellus hendrerit. Pellentesque aliquet nibh nec urna. In nisi neque, aliquet vel, dapibus id, mattis vel, nisi. Sed pretium, ligula sollicitudin laoreet viverra, tortor libero sodales leo, eget blandit nunc tortor eu nibh. Nullam mollis. Ut justo. Suspendisse potenti.</dd>
+
+</dl>
+
+</div>
+</body>
+</html>
