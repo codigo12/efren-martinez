@@ -1,0 +1,167 @@
+// Permitir shortcodes en widgets :
+add_filter('widget_text', 'do_shortcode');
+
+//Ocultar barra de administrador en el front-end:
+add_filter('show_admin_bar', '__return_false');
+
+//Incrementar la memoria virtual:
+define('WP_MEMORY_LIMIT', '96M'); 
+
+//Definir tamaño de thumbnail:
+add_image_size( 'custom-thumb-960', 940, 327, true );
+add_image_size( 'custom-thumb-600', 600, 150, true );
+add_image_size( 'custom-thumb-300', 300, 100, true );
+<?php the_post_thumbnail('custom-thumb-212'); ?> 
+
+//Cargar archivos de contact form solo en determinada seccion:
+add_action( 'wp_print_scripts', 'deregister_cf7_javascript', 100 );
+function deregister_cf7_javascript() {
+    if ( !is_page( ID_DE_LA_PAGINA_AQUI ) ) {
+        wp_deregister_script( 'contact-form-7' );
+    }
+}
+add_action( 'wp_print_styles', 'deregister_cf7_styles', 100 );
+function deregister_cf7_styles() {
+    if ( !is_page( ID_DE_LA_PAGINA_AQUI ) ) {
+        wp_deregister_style( 'contact-form-7' );
+    }
+}
+
+//Ocultar la version de wordpress:
+function remove_wp_version(){
+    return '';
+}
+add_filter('the_generator', 'remove_wp_version');
+
+//Crear widget personalizado:
+class My_Widget extends WP_Widget { 
+    function My_Widget() { 
+        parent::WP_Widget(false, ' widget de prueba '); 
+    } 
+function form($instance) { 
+    } 
+function update($new_instance, $old_instance) { 
+        return $new_instance; 
+    } 
+function widget($args, $instance) { 
+    } 
+} 
+register_widget(' nuevo widget ');
+
+//Definir tamaño de la descripcion:
+<?php add_filter('the_excerpt', 'my_excerpts');
+function my_excerpts($content = false) {
+            global $post;
+            $mycontent = $post->post_excerpt;
+            $mycontent = $post->post_content;
+            $mycontent = strip_shortcodes($mycontent);
+            $mycontent = str_replace(']]>', ']]&gt;', $mycontent);
+            $mycontent = strip_tags($mycontent);
+            $excerpt_length = 55;
+            $words = explode(' ', $mycontent, $excerpt_length + 1);
+            if(count($words) > $excerpt_length) :
+                array_pop($words);
+                array_push($words, '...');
+                $mycontent = implode(' ', $words);
+            endif;
+            $mycontent = '<p>' . $mycontent . '</p>';
+    return $mycontent;
+}
+?>
+<?php echo my_excerpts(); ?> 
+
+//Redireccionar al unico post de la categoria o etiqueta:
+function stf_redirect_to_post(){
+    global $wp_query;
+    if( is_archive() && $wp_query->post_count == 1 ){
+        the_post();
+        $post_url = get_permalink();
+        wp_redirect( $post_url );
+    } 
+} add_action('template_redirect', 'stf_redirect_to_post');
+
+//Mostrar contenido diferente para Mac & Windows:
+<?php
+if (stristr($_SERVER['HTTP_USER_AGENT'],"mac")) {
+echo ‘Hello, I\’m a Mac.’;
+} else {
+echo ‘And I\’m a PC.’;
+}
+?>
+
+//Redireccionar despues de iniciar sesion:
+<?php
+function redirect_user_on_role()
+{
+     global $current_user;
+          get_currentuserinfo();
+          if ($current_user->user_level == 0)
+          {
+             wp_redirect( home_url() ); exit;
+          }
+     else if ($current_user->user_level > 1)
+     {
+             wp_redirect( home_url() ); exit;
+          }
+          else if ($current_user->user_level >8)
+          {
+          wp_redirect( home_url() ); exit;
+          }
+     else
+          {
+                $redirect_to = 'http://google.com/';
+             return $redirect_to;
+     }
+}
+add_action('admin_init','redirect_user_on_role');
+?>
+
+//Cambiar logotipo de Wordpress en inicio de sesion:
+add_action( 'login_head', 'ilc_custom_login');
+function ilc_custom_login() {
+    echo ' <script type="text/javascript">window.onload = function(){document.getElementById("login").getElementsByTagName("a")[0].href = "'. home_url() . '";document.getElementById("login").getElementsByTagName("a")[0].title = "Go to site";}</script>';
+}
+
+//Modo de Mantenimiento:
+function maintenace_mode() {
+if ( !current_user_can( 'edit_themes' ) || !is_user_logged_in() ) {
+die('MENSAJE');
+}
+}
+add_action('get_header', 'maintenace_mode');
+
+//Agregar favicon:
+add_action( 'wp_head', 'ilc_favicon');
+function ilc_favicon(){
+    echo "<link rel='shortcut icon' href='" . get_stylesheet_directory_uri() . "/favicon.ico' />" . "\n";
+}
+
+//Proteger plagio de contenidos(content scrappers)
+function break_out_of_frames() {
+    if (!is_preview()) {
+        echo "\n<script type=\"text/javascript\">";
+        echo "\n<!--";
+        echo "\nif (parent.frames.length > 0) { parent.location.href = location.href; }";
+        echo "\n-->";
+        echo "\n</script>\n\n";
+    }
+}
+add_action('wp_head', 'break_out_of_frames');
+
+//Permitir codigo php en contenidos:
+function php_text($text) {
+if (strpos($text, '<' . '?') !== false) {
+ob_start();
+eval('?' . '>' . $text);
+$text = ob_get_contents();
+ob_end_clean();
+}
+return $text;
+}
+add_filter('widget_text', 'php_text', 99);
+
+//Redirigir a pagina especial, cualquier perfil de autor:
+add_filter( 'author_link', 'my_author_link' );
+function my_author_link() {
+    return home_url( 'about' );
+}
