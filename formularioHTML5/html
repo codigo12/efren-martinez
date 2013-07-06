@@ -28,7 +28,7 @@
 			</section>
 			<section id="aside" class="clearfix">
 				<section id="recipientcase">
-				<h3>Asunto:</h3>
+				<h3>Asunto: </h3>
 					<select id="asunto" name="recipient" tabindex="6" class="selmenu">
   						<option value="rediseño">Rediseño</option>
   						<option value="programacion">Programacion</option>
