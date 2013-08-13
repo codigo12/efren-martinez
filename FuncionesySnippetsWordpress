@@ -165,3 +165,67 @@ add_filter( 'author_link', 'my_author_link' );
 function my_author_link() {
     return home_url( 'about' );
 }
+
+//mostrar RSS fedd
+<?php include_once(ABSPATH.WPINC.'/rss.php'); wp_rss(‘PUT URL OF FEED HERE', 5); ?>
+
+//permitir HTML en descripcion
+remove_filter( 'pre_term_description', 'wp_filter_kses' );
+remove_filter( 'pre_link_description', 'wp_filter_kses' );
+remove_filter( 'pre_link_notes', 'wp_filter_kses' );
+remove_filter( 'term_description', 'wp_kses_data' );
+
+//Mostrar articulos destacados
+<?php
+$sticky = get_option('sticky_posts');
+rsort( $sticky );
+$sticky = array_slice( $sticky, 0, 5);
+query_posts( array( 'post__in' => $sticky, 'caller_get_posts' => 1 ) );
+if (have_posts()) :
+while (have_posts()) : the_post();
+the_title(); 
+the_excerpt(); 
+endwhile;
+endif;
+?>
+
+//mostrar RSS en navegacion
+<?php if(is_paged()){ ?>
+        <div id="rss-remind">
+                <p>Subscribe to <?php bloginfo('name'); ?> and never miss a thing:<br />
+                        <a href="<?php bloginfo('rss2_url'); ?>">All Posts<span> (RSS)</span></a> | 
+                        <a href="<?php bloginfo('comments_rss2_url'); ?>">All Comments<span> (RSS)</span></a>
+                </p>
+        </div><!-- #rss-remind -->
+<?php } ?>
+
+//Cambiar estilos a respuestass de autor
+<?php         
+$oddcomment = '';
+$authID = get_the_author_meta('ID');
+if($authID == $comment->user_id) $oddcomment = 'authcomment';
+?>
+<li class="commentcontainer <?php    echo $oddcomment; ?>" id=”comment-<?php comment_ID(); ?>”>
+...
+</li>
+
+//Cambiar imagen de avatar
+add_filter( ‘avatar_defaults’, ‘newgravatar’ );
+function newgravatar ($avatar_defaults) {
+$myavatar = get_bloginfo(‘template_directory’) . ‘/images/imagefile.extension’;
+$avatar_defaults[$myavatar] = "NAME OF YOUR GRAVATAR";
+return $avatar_defaults;
+}
+
+//Mostrar articulos con mas comentarios
+$popular = new WP_Query('orderby=comment_count&amp;posts_per_page=5');
+while ($popular->have_posts()) : $popular->the_post();
+$justanimage = get_post_meta($post->ID, 'Image', true);
+if ($justanimage) {
+?>
+<img src="<?php echo get_post_meta($post-/>ID, "Image", true); ?>" alt="<?php the_title(); ?>" />
+<?php } else { ?>
+<img src="http://URL-TO-YOUR-THUMBNAIL.jpg" alt="" />
+<?php } ?>
+<h2><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h2>
+<?php endwhile; ?>
